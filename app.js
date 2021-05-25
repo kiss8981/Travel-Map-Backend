@@ -1,6 +1,6 @@
 var express = require('express');
 var request = require('request');
-var { NaverClientId, NaverClientSecret } = require('./config.json')
+var { NaverClientId, NaverClientSecret, port } = require('./config.json')
 var cors = require('cors');
 var app = express();
 
@@ -17,6 +17,6 @@ app.get('/coronanews', function(req, res){
    });
 });
 
-app.listen(8081, function () {
-  console.log('http://127.0.0.1:3000/search/blog?query=검색어 app listening on port 3000!');
+app.listen(port, function () {
+  console.log(`http://127.0.0.1:${port} app listening on port ${port}`);
 });

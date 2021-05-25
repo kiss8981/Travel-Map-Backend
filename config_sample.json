@@ -1,4 +1,5 @@
 {
     "NaverClientId": "NaverClientId",
-    "NaverClientSecret": "NaverClientId"
+    "NaverClientSecret": "NaverClientId",
+    "port": "8080"
 }
