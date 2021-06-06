@@ -1,5 +1,5 @@
 {
-    "NaverClientId": "NaverClientId",
-    "NaverClientSecret": "NaverClientId",
+    "token": "API 요청시 사용될 토큰",
+    "mongoURI": "MongoDB URL",
     "port": "8080"
 }
