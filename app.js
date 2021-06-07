@@ -1,6 +1,9 @@
 const mongoose = require('mongoose')
 const express = require('express');
 const cors = require('cors');
+const multer = require('multer')
+
+const upload = multer({dest: './img'})
 
 var { mongoURI, port, token } = require('./config.json')
 
@@ -10,20 +13,24 @@ var app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/image', express.static('./img'))
 
 mongoose.connect(mongoURI, {
    useNewUrlParser: true, useUnifiedTopology: true, useCreateIndex: true, useFindAndModify: false
  }).then(() => console.log('MongoDB Connected...'))
    .catch(err => console.log(err))
 
-app.post('/api/data', function(req, res){
+app.post('/api/data', upload.single('img'), function(req, res){
    if (req.headers.token === token) {
+      console.log(req.body)
       var userDB = new User();
       userDB.user_id = req.body.user_id;
+      userDB.user_name = req.body.user_name;
+      userDB.user_email = req.body.user_email;
       userDB.place_name = req.body.place_name;
       userDB.description = req.body.description;
       userDB.latlng = req.body.latlng;
-      userDB.img = req.body.img;
+      userDB.img = '/image/' + req.file.filename;
       userDB.visittime = req.body.visittime;
       userDB.save(function(err){
          if(err){
