@@ -62,6 +62,20 @@ app.get('/api/data', function(req,res){
    
 });
 
+app.get('/api/data/image/:image_id', function(req, res){
+   if (req.headers.token === token) {
+      User.find({img: '/image/' + req.params.image_id}, function(err, userdata){
+         if(err) return res.status(500).json({error: err});
+         if(!userdata) return res.status(404).json({error: 'userdata not found'});
+         res.json(userdata);
+      })
+   } else if (!req.headers.token) {
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
+   } else {
+         return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
+   }
+});
+
 app.get('/api/data/:user_id', function(req, res){
    if (req.headers.token === token) {
       User.find({user_id: req.params.user_id}, function(err, userdata){
