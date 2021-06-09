@@ -27,6 +27,7 @@ app.post('/api/data', upload.single('img'), function(req, res){
       userDB.user_id = req.body.user_id;
       userDB.user_name = req.body.user_name;
       userDB.user_email = req.body.user_email;
+      userDB.user_token = req.body.user_token;
       userDB.place_name = req.body.place_name;
       userDB.description = req.body.description;
       userDB.latlng = req.body.latlng;
