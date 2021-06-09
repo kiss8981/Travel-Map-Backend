@@ -60,7 +60,6 @@ app.get('/api/data', function(req,res){
    } else {
       return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
-   
 });
 
 app.get('/api/data/image/:image_id', function(req, res){
@@ -74,6 +73,29 @@ app.get('/api/data/image/:image_id', function(req, res){
       return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
          return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
+   }
+});
+
+app.delete('/api/data/:image_id', function(req,res){
+   if (req.headers.token === token) {
+      User.find({img: '/image/' + req.params.image_id}, function(err, userdata){
+         if (userdata.length === 0) {
+            return res.status(401).send({result: 'failed', info: "Authentication failed (일치하는 토큰정보가 없습니다.)"});
+         } else if (req.headers.user_token === userdata[0].user_token) {
+            User.remove({ img: '/image/' + req.params.image_id }, function(err, output){
+               if(err) return res.status(500).json({result: 'failed', info: "database failure"});
+               res.json({result: 'success', info: "Delete Success (성공적으로 삭제했습니다)"});
+           })
+         } else if (!req.headers.user_token) {
+            return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
+         } else {
+            return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
+         }
+      })
+   } else if (!req.headers.token) {
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
+   } else {
+      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
