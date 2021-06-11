@@ -22,6 +22,14 @@ mongoose.connect(mongoURI, {
  }).then(() => console.log('MongoDB Connected...'))
    .catch(err => console.log(err))
 
+app.get('/', function(req,res){
+   res.json({'Hello': 'Wolrd', 'Travel': 'API'})
+});
+
+app.get('/api', function(req,res){
+   res.json({'Hello': 'Wolrd', 'Travel': 'API'})
+});
+
 app.post('/api/data', upload.single('img'), function(req, res){
    if (req.headers.token === token) {
       var userDB = new User();
