@@ -2,12 +2,14 @@ const mongoose = require('mongoose')
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer')
+const jwt = require('jsonwebtoken')
 
 const upload = multer({dest: './img'})
 
 var { mongoURI, port, token } = require('./config.json')
 
 var { User } = require('./models/User');
+var { UserInfo } = require('./models/UserInfo');
 
 var app = express();
 
@@ -22,7 +24,6 @@ mongoose.connect(mongoURI, {
 
 app.post('/api/data', upload.single('img'), function(req, res){
    if (req.headers.token === token) {
-      console.log(req.body)
       var userDB = new User();
       userDB.user_id = req.body.user_id;
       userDB.user_name = req.body.user_name;
@@ -79,18 +80,20 @@ app.get('/api/data/image/:image_id', function(req, res){
 app.delete('/api/data/:image_id', function(req,res){
    if (req.headers.token === token) {
       User.find({img: '/image/' + req.params.image_id}, function(err, userdata){
-         if (userdata.length === 0) {
-            return res.status(401).send({result: 'failed', info: "Authentication failed (일치하는 토큰정보가 없습니다.)"});
-         } else if (req.headers.user_token === userdata[0].user_token) {
-            User.remove({ img: '/image/' + req.params.image_id }, function(err, output){
-               if(err) return res.status(500).json({result: 'failed', info: "database failure"});
-               res.json({result: 'success', info: "Delete Success (성공적으로 삭제했습니다)"});
-           })
-         } else if (!req.headers.user_token) {
-            return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
-         } else {
-            return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
-         }
+         UserInfo.find({user_id: req.headers.user_id}, function(err, userinfodata){
+            if (userdata.length === 0) {
+               return res.status(401).send({result: 'failed', info: "Authentication failed (일치하는 유저정보가 없습니다.)"});
+            } else if (req.headers.user_token === userinfodata[0].user_token) {
+               User.remove({ img: '/image/' + req.params.image_id }, function(err, output){
+                  if(err) return res.status(500).json({result: 'failed', info: "Database failure (데이터베이스 오류 발생.)"});
+                  res.json({result: 'success', info: "Delete success (성공적으로 삭제했습니다.)"});
+              })
+            } else if (!req.headers.user_token) {
+               return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
+            } else {
+               return res.status(401).send({result: 'error', info: err});
+            }
+         })
       })
    } else if (!req.headers.token) {
       return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
@@ -110,6 +113,44 @@ app.get('/api/data/:user_id', function(req, res){
       return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
          return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
+   }
+});
+
+
+app.post('/api/userinfo/:user_id', function(req, res){
+   if (req.headers.token === token) {
+      UserInfo.find({user_id: req.params.user_id}, function(err, userdata){
+         if (userdata.length === 0 || !userdata || userdata === null) {
+            var token = jwt.sign({
+               userid: req.params.user_id
+            },
+            "travelReportToken",
+            {
+               subject: "travelReport",
+               issuer: "travelReportToken"
+            });
+            var userInfoDB = new UserInfo();
+            userInfoDB.user_token = token;
+            userInfoDB.user_id = req.body.user_id;
+            userInfoDB.user_name = req.body.user_name;
+            userInfoDB.user_email = req.body.user_email;
+            userInfoDB.save(function(err){
+               if(err){
+                  console.error(err);
+                  res.json({result: 'Error', info: err});
+               return;
+            }
+               res.json({result: 'Success (성공적으로 데이터를 추가했습니다)', user_token: token})
+            });
+         } else {
+            if(err) return res.status(500).json({error: err});
+            res.status(202).json({result: 'Success', user_token: userdata[0].user_token})
+         }
+      })
+   } else if (!req.headers.token) {
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
+   } else {
+      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
