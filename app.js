@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const multer = require('multer')
 const jwt = require('jsonwebtoken')
+const fs = require('fs')
 
 const upload = multer({dest: './img'})
 
@@ -95,6 +96,10 @@ app.delete('/api/data/:image_id', function(req,res){
                User.remove({ img: '/image/' + req.params.image_id }, function(err, output){
                   if(err) return res.status(500).json({result: 'failed', info: "Database failure (데이터베이스 오류 발생.)"});
                   res.json({result: 'success', info: "Delete success (성공적으로 삭제했습니다.)"});
+                  fs.unlink('img/' + req.params.image_id, function(err){
+                     if(err) console.log(err);
+                     console.log(`${req.params.image_id} file deleted`);
+                  })
               })
             } else if (!req.headers.user_token) {
                return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
