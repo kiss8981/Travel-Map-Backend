@@ -125,56 +125,60 @@ app.get('/api/data/:user_id', function(req, res){
    } else if (!req.headers.token) {
       return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
-         return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
+      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
 
 app.post('/api/userinfo/:user_id', function(req, res){
-   if (req.headers.token === token) {
-      UserInfo.find({user_id: req.params.user_id}, function(err, userdata){
-         if (userdata.length === 0 || !userdata || userdata === null) {
-            function generateRandomCode(n) {
-               let str = ''
-               for (let i = 0; i < n; i++) {
-                 str += Math.floor(Math.random() * 10)
+   if (!req.body.user_id || req.body.user_id === null || req.body.user_id === "") {
+      return res.status(401).send({result: 'failed', info: "Authentication failed (유저 아이디 정보가 없습니다.)"});
+   } else{
+      if (req.headers.token === token) {
+         UserInfo.find({user_id: req.params.user_id}, function(err, userdata){
+            if (userdata.length === 0 || !userdata || userdata === null) {
+               function generateRandomCode(n) {
+                  let str = ''
+                  for (let i = 0; i < n; i++) {
+                  str += Math.floor(Math.random() * 10)
+                  }
+                  return str
                }
-               return str
-            }
 
-            var id = generateRandomCode(10)
-            var token = jwt.sign({
-               userid: req.params.user_id
-            },
-            "travelReportToken",
-            {
-               subject: "travelReport",
-               issuer: "travelReportToken"
-            });
-            var userInfoDB = new UserInfo();
-            userInfoDB.type = req.body.type;
-            userInfoDB.id = id;
-            userInfoDB.user_token = token;
-            userInfoDB.user_id = req.body.user_id;
-            userInfoDB.user_name = req.body.user_name;
-            userInfoDB.user_email = req.body.user_email;
-            userInfoDB.save(function(err){
-               if(err){
-                  console.error(err);
-                  res.json({result: 'Error', info: err});
-               return;
+               var id = generateRandomCode(10)
+               var token = jwt.sign({
+                  userid: req.params.user_id
+               },
+               "travelReportToken",
+               {
+                  subject: "travelReport",
+                  issuer: "travelReportToken"
+               });
+               var userInfoDB = new UserInfo();
+               userInfoDB.type = req.body.type;
+               userInfoDB.id = id;
+               userInfoDB.user_token = token;
+               userInfoDB.user_id = req.body.user_id;
+               userInfoDB.user_name = req.body.user_name;
+               userInfoDB.user_email = req.body.user_email;
+               userInfoDB.save(function(err){
+                  if(err){
+                     console.error(err);
+                     res.json({result: 'Error', info: err});
+                  return;
+               }
+                  res.json({result: 'Success (성공적으로 데이터를 추가했습니다)', 'user_token': token, 'user_id': id})
+               });
+            } else {
+               if(err) return res.status(500).json({error: err});
+               res.status(202).json({result: 'Success', 'user_token': userdata[0].user_token, 'user_id': userdata[0].id})
             }
-               res.json({result: 'Success (성공적으로 데이터를 추가했습니다)', 'user_token': token, 'user_id': id})
-            });
-         } else {
-            if(err) return res.status(500).json({error: err});
-            res.status(202).json({result: 'Success', 'user_token': userdata[0].user_token, 'user_id': userdata[0].id})
-         }
-      })
-   } else if (!req.headers.token) {
-      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
-   } else {
-      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
+         })
+      } else if (!req.headers.token) {
+         return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
+      } else {
+         return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
+      }
    }
 });
 
