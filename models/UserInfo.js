@@ -4,6 +4,7 @@ var Schema = mongoose.Schema;
 
 
 var userInfoSchema = new Schema({
+    type: String,
     id: String,
     user_token: String,
     user_id: String,

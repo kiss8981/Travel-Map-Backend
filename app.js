@@ -152,6 +152,7 @@ app.post('/api/userinfo/:user_id', function(req, res){
                issuer: "travelReportToken"
             });
             var userInfoDB = new UserInfo();
+            userInfoDB.type = req.body.type;
             userInfoDB.id = id;
             userInfoDB.user_token = token;
             userInfoDB.user_id = req.body.user_id;
