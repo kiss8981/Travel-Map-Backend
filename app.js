@@ -89,7 +89,7 @@ app.get('/api/data/image/:image_id', function(req, res){
 app.delete('/api/data/:image_id', function(req,res){
    if (req.headers.token === token) {
       User.find({img: '/image/' + req.params.image_id}, function(err, userdata){
-         UserInfo.find({user_id: req.headers.user_id}, function(err, userinfodata){
+         UserInfo.find({id: req.headers.user_id}, function(err, userinfodata){
             if (userdata.length === 0) {
                return res.status(401).send({result: 'failed', info: "Authentication failed (일치하는 유저정보가 없습니다.)"});
             } else if (req.headers.user_token === userinfodata[0].user_token) {
@@ -134,6 +134,15 @@ app.post('/api/userinfo/:user_id', function(req, res){
    if (req.headers.token === token) {
       UserInfo.find({user_id: req.params.user_id}, function(err, userdata){
          if (userdata.length === 0 || !userdata || userdata === null) {
+            function generateRandomCode(n) {
+               let str = ''
+               for (let i = 0; i < n; i++) {
+                 str += Math.floor(Math.random() * 10)
+               }
+               return str
+            }
+
+            var id = generateRandomCode(10)
             var token = jwt.sign({
                userid: req.params.user_id
             },
@@ -143,6 +152,7 @@ app.post('/api/userinfo/:user_id', function(req, res){
                issuer: "travelReportToken"
             });
             var userInfoDB = new UserInfo();
+            userInfoDB.id = id;
             userInfoDB.user_token = token;
             userInfoDB.user_id = req.body.user_id;
             userInfoDB.user_name = req.body.user_name;
@@ -153,11 +163,11 @@ app.post('/api/userinfo/:user_id', function(req, res){
                   res.json({result: 'Error', info: err});
                return;
             }
-               res.json({result: 'Success (성공적으로 데이터를 추가했습니다)', user_token: token})
+               res.json({result: 'Success (성공적으로 데이터를 추가했습니다)', 'user_token': token, 'user_id': id})
             });
          } else {
             if(err) return res.status(500).json({error: err});
-            res.status(202).json({result: 'Success', user_token: userdata[0].user_token})
+            res.status(202).json({result: 'Success', 'user_token': userdata[0].user_token, 'user_id': userdata[0].id})
          }
       })
    } else if (!req.headers.token) {
