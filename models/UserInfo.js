@@ -10,6 +10,7 @@ var userInfoSchema = new Schema({
     user_id: String,
     user_name: String,
     user_email: String,
+    user_password: String,
     published_date: { type: Date, default: Date.now }
 }, {collection: 'userinfo'});
 
