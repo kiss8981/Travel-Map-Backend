@@ -13,9 +13,7 @@ const { smtpTransport } = require('./config/email');
 
 var { User } = require('./models/User');
 var { UserInfo } = require('./models/UserInfo');
-
-const resMessage = require('./utills/index');
-const util = require('./utills/util');
+const { json } = require('body-parser');
 
 var app = express();
 
@@ -34,15 +32,14 @@ var generateRandom = function (min, max) {
 }
 
 app.get('/', function(req,res){
-   res.status(resMessage.status.OK).json(util.successTrue(resMessage.message.CONNECT_SUCCESS, resMessage.message.NO_DATA))
+   res.json({'Hello': 'Wolrd', 'Travel': 'API'})
 });
 
 app.get('/api', function(req,res){
-   res.status(resMessage.status.OK).json(util.successTrue(resMessage.message.CONNECT_SUCCESS, resMessage.message.NO_DATA))
+   res.json({'Hello': 'Wolrd', 'Travel': 'API'})
 });
 
 app.post('/api/data', upload.single('img'), function(req, res){
-   if (!req.file) return res.status(resMessage.status.FORBIDDEN).json(util.successFalse(resMessage.message.EXIST_DATA, '파일 정보가 없습니다'))
    if (req.headers.token === token) {
       var userDB = new User();
       userDB.user_id = req.body.user_id;
@@ -56,14 +53,16 @@ app.post('/api/data', upload.single('img'), function(req, res){
       userDB.visittime = req.body.visittime;
       userDB.save(function(err){
          if(err){
-            return res.status(resMessage.status.FORBIDDEN).json(util.successFalse(resMessage.message.EXIST_DATA, err))
-         }
-         return res.status(resMessage.status.FORBIDDEN).json(util.successTrue('성공적으로 데이터를 추가했습니다'))
+            console.error(err);
+            res.json({result: 'error', info: err});
+         return;
+      }
+      res.json({result: 'success'});
       });
    } else if (!req.headers.token) {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
@@ -71,13 +70,13 @@ app.post('/api/data', upload.single('img'), function(req, res){
 app.get('/api/data', function(req,res){
    if (req.headers.token === token) {
       User.find(function(err, userdata){
-         if(err) return res.status(resMessage.status.INTERNAL_SERVER_ERROR).json(util.successFalse(resMessage.message.INTERNAL_SERVER_ERROR, err))
+         if(err) return res.status(500).send({result: 'failed', info: err});
          res.json(userdata);
      })
    } else if (!req.headers.token) {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
@@ -89,9 +88,9 @@ app.get('/api/data/image/:image_id', function(req, res){
          res.json(userdata);
       })
    } else if (!req.headers.token) {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+         return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
@@ -111,16 +110,16 @@ app.delete('/api/data/:image_id', function(req,res){
                   })
               })
             } else if (!req.headers.user_token) {
-               return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+               return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
             } else {
-               return res.status(resMessage.status.INTERNAL_SERVER_ERROR).json(util.successFalse(resMessage.message.INTERNAL_SERVER_ERROR, err))
+               return res.status(401).send({result: 'failed', info: err});
             }
          })
       })
    } else if (!req.headers.token) {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
@@ -132,9 +131,9 @@ app.get('/api/data/:user_id', function(req, res){
          res.json(userdata);
       })
    } else if (!req.headers.token) {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
@@ -146,9 +145,9 @@ app.get('/api/userinfo/:user_id', function(req, res){
          res.json({'id': userdata[0].id, 'user_name': userdata[0].user_name, 'user_email': userdata[0].user_email});
       })
    } else if (!req.headers.token) {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
    } else {
-      return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+      return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 });
 
@@ -198,9 +197,9 @@ app.post('/api/userinfo/:user_id', function(req, res){
             }
          })
       } else if (!req.headers.token) {
-         return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+         return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
       } else {
-         return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+         return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
       }
    }
 });
@@ -254,9 +253,9 @@ app.post('/api/userinfo/register/:user_id', function(req, res){
             }
          })
       } else if (!req.headers.token) {
-         return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+         return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
       } else {
-         return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+         return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
       }
    }
 });
@@ -287,9 +286,9 @@ app.post('/api/userinfo/login/:user_id', function(req, res){
             }
          })
       } else if (!req.headers.token) {
-         return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.NO_TOKEN))
+         return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
       } else {
-         return res.status(resMessage.status.UNAUTHORIZED).json(util.successFalse(resMessage.message.INVALID_TOKEN))
+         return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
       }
    }
 });
@@ -313,6 +312,37 @@ app.post('/api/email', async function(req, res){
       }
    })
 });
+
+app.get('/api/users', function(req, res){
+   if (req.headers.token === token) {
+      UserInfo.find(function(err, userdata){
+         return res.status(202).json({result: 'success', info: "성공적으로 데이터가 로딩되었습니다", data: userdata})
+      });
+   } else if (!req.headers.token) {
+       return res.status(401).send({result: 'failed', info: "Authentication failed (토큰정보가 없습니다.)"});
+   } else {
+       return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
+   }
+})
+
+app.get('/api/user/admin', function(req, res){
+   if (!req.headers.user_token) {
+      return res.status(202).json({result: 'failed', info: "토큰 정보가 없습니다!", data: []})
+   } else {
+      UserInfo.find({user_token: req.headers.user_token}, function(err, userdata){
+         if (!userdata) return res.status(202).json({result: 'failed', info: "정보를 찾을수 없습니다!", data: []})
+         if (userdata.length === 0) return res.status(202).json({result: 'failed', info: "정보를 찾을수 없습니다!", data: []})
+         if (userdata[0].is_admin === true) {
+            return res.status(202).json({result: 'success', info: "관리자 인증 성공!", data: userdata[0]})
+         }
+         if (!userdata[0].admin || userdata[0].admin === "" || userdata[0].admin === null || userdata[0].admin === undefined) {
+            return res.status(202).json({result: 'failed', info: "관리자만 접근이 가능합니다!", data: userdata[0]})
+         };
+      })
+   }
+});
+
+
 
 app.listen(port, function () {
   console.log(`http://127.0.0.1:${port} app listening on port ${port}`);

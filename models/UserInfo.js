@@ -11,6 +11,7 @@ var userInfoSchema = new Schema({
     user_name: String,
     user_email: String,
     user_password: String,
+    is_admin: Boolean,
     published_date: { type: Date, default: Date.now }
 }, {collection: 'userinfo'});
 
