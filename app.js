@@ -13,7 +13,6 @@ const { smtpTransport } = require('./config/email');
 
 var { User } = require('./models/User');
 var { UserInfo } = require('./models/UserInfo');
-const { json } = require('body-parser');
 
 var app = express();
 
