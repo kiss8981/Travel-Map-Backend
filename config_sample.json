@@ -1,5 +1,10 @@
 {
     "token": "API 요청시 사용될 토큰",
     "mongoURI": "MongoDB URL",
-    "port": "8080"
+    "port": "8080",
+    "MAIL_EMAIL": "메일서버 이메일",
+    "MAIL_PASSWORD": "메일서버 비밀번호",
+    "cloudflareAuthKey": "cloudflareAuthKey",
+    "cloudflareAuthEmail": "cloudflareAuthEmail",
+    "cloudflareZoneTag": "cloudflareZoneTag"
 }

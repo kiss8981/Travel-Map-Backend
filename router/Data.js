@@ -1,29 +1,15 @@
 const express = require('express');
 const multer = require('multer');
-const multerS3 = require('multer-s3');
-const AWS = require('aws-sdk');
 const fs = require('fs');
 
 var app = express();
 
-var { User } = require('../models/User');
-var { UserInfo } = require('../models/UserInfo');
-
 var { token } = require('../config.json')
 
-AWS.config.loadFromPath(__dirname + '/../configaws.json');
+const upload = multer({dest: '../img'})
 
-const s3 = new AWS.S3();
-const upload = multer({
-   storage: multerS3({
-       s3: s3,
-       bucket: 'travel-report',
-       acl: 'public-read',
-       key: function(req, file, cb){
-               cb(null, 'userimage/' + Date.now() + '.' + file.originalname.split('.').pop()); // 이름 설정
-       }
-   })
-},'NONE');
+var { User } = require('../models/User');
+var { UserInfo } = require('../models/UserInfo');
 
 
 app.post('/', upload.single('img'), function(req, res){
@@ -36,7 +22,7 @@ app.post('/', upload.single('img'), function(req, res){
        userDB.place_name = req.body.place_name;
        userDB.description = req.body.description;
        userDB.latlng = req.body.latlng;
-       userDB.img = '/userimage/' + Date.now() + '.' + req.file.originalname.split('.').pop();
+       userDB.img = '/image/' + req.file.filename;
        userDB.visittime = req.body.visittime;
        userDB.save(function(err){
           if(err){

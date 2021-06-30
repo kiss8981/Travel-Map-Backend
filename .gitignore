@@ -28,4 +28,4 @@ config.json
 
 .env
 
-config-s3.json
+configaws.json

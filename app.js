@@ -11,6 +11,7 @@ var app = express();
 
 const dataRouter = require('./router/Data');
 const userRouter = require('./router/UserInfo');
+const analyticsRouter = require('./router/Analytics');
 
 app.use(cors());
 app.use(express.json());
@@ -36,6 +37,7 @@ app.get('/api', function(req,res){
 
 app.use('/api/data', dataRouter)
 app.use('/api/userinfo', userRouter)
+app.use('/api/analytics', analyticsRouter)
 
 
 app.post('/api/email', async function(req, res){
