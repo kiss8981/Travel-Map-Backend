@@ -12,6 +12,7 @@ var app = express();
 const dataRouter = require('./router/Data');
 const userRouter = require('./router/UserInfo');
 const analyticsRouter = require('./router/Analytics');
+const adminRouter = require('./router/Admin');
 
 app.use(cors());
 app.use(express.json());
@@ -38,6 +39,7 @@ app.get('/api', function(req,res){
 app.use('/api/data', dataRouter)
 app.use('/api/userinfo', userRouter)
 app.use('/api/analytics', analyticsRouter)
+app.use('/api/admin', adminRouter)
 
 
 app.post('/api/email', async function(req, res){
@@ -70,23 +72,6 @@ app.get('/api/users', function(req, res){
        return res.status(401).send({result: 'failed', info: "Authentication failed (인증에 실패하였습니다.)"});
    }
 })
-
-app.get('/api/user/admin', function(req, res){
-   if (!req.headers.user_token) {
-      return res.status(202).json({result: 'failed', info: "토큰 정보가 없습니다!", data: []})
-   } else {
-      UserInfo.find({user_token: req.headers.user_token}, function(err, userdata){
-         if (!userdata) return res.status(202).json({result: 'failed', info: "정보를 찾을수 없습니다!", data: []})
-         if (userdata.length === 0) return res.status(202).json({result: 'failed', info: "정보를 찾을수 없습니다!", data: []})
-         if (userdata[0].is_admin === true) {
-            return res.status(202).json({result: 'success', info: "관리자 인증 성공!", data: userdata[0]})
-         }
-         if (!userdata[0].admin || userdata[0].admin === "" || userdata[0].admin === null || userdata[0].admin === undefined) {
-            return res.status(202).json({result: 'failed', info: "관리자만 접근이 가능합니다!", data: userdata[0]})
-         };
-      })
-   }
-});
 
 
 

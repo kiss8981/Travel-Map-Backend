@@ -4,7 +4,7 @@ const date = new Date();
 var year = date.getFullYear()
 var month = new String(date.getMonth() + 1);
 month = month >= 10 ? month : '0' + month; // month 두자리로 저장
-var day = new String(date.getDate() - 1);
+var day = new String(date.getDate());
 day = day >= 10 ? day : '0' + day; //day 두자리로 저장
 
 const today = `${year}-${month}-${day}`

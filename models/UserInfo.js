@@ -1,8 +1,6 @@
 const mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
-
-
 var userInfoSchema = new Schema({
     type: String,
     id: String,
