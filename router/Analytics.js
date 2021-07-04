@@ -7,7 +7,7 @@ month = month >= 10 ? month : '0' + month; // month 두자리로 저장
 var day = new String(date.getDate());
 day = day >= 10 ? day : '0' + day; //day 두자리로 저장
 
-const today = `${year}-${month}-${day}`
+const today3 = `${year}-${month}-${day}`
 
 const { GraphQLClient, gql } = require('graphql-request');
 const client = new GraphQLClient('https://api.cloudflare.com/client/v4/graphql')
@@ -19,6 +19,11 @@ var { token, cloudflareAuthKey, cloudflareAuthEmail, cloudflareZoneTag } = requi
 var { Analytics } = require('../models/Analytics');
 
  app.get('/', async function(req,res){
+    if (!req.body.date) {
+      today = today3
+    } else {
+      today = req.body.date
+    }
     if (req.headers.token === token) {
       Analytics.find({date: today}, async function(err, analyticsData){
           if(err) return res.status(500).send({result: 'failed', info: err});
