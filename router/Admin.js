@@ -57,6 +57,7 @@ app.post('/alart', function(req, res){
       adminAlart.msg = req.body.message;
       adminAlart.author = req.body.author;
       adminAlart.title = req.body.title;
+      adminAlart.status = true;
       adminAlart.save(function(err){
          if(err){
             console.error(err);
@@ -70,5 +71,51 @@ app.post('/alart', function(req, res){
       return res.status(202).json({result: 'failed', info: "토큰정보가 올바르지 않습니다!", data: []})
    }
 });
+
+app.post('/alartstatus', function(req, res){
+   if (!req.headers.token === token) {
+      return res.status(202).json({result: 'failed', info: "토큰 정보가 없습니다!", data: []})
+   }
+   if (!req.body.id) {
+      return res.status(202).json({result: 'failed', info: "아이디 정보가 없습니다!", data: []})
+   }
+   if (!req.body.status) {
+      return res.status(202).json({result: 'failed', info: "상태 정보가 없습니다!", data: []})
+   } else {
+      if (req.body.status === "true") var status = false
+      if (req.body.status === "false") var status = true
+   }
+   if (req.headers.token === token) {
+      Admin.findOneAndUpdate({ _id: req.body.id }, { $set: { status: status }}, function(err, data){
+         if(err){
+            console.error(err);
+            res.json({result: 'error', info: err});
+         }
+         if (status === false) {
+            return res.status(202).json({result: 'success', info: `${data.title} (${data._id}) 알림을 비활성화했습니다!`})
+         } else {
+            return res.status(202).json({result: 'success', info: `${data.title} (${data._id}) 알림을 활성화했습니다!`})
+         }
+      });
+   } else {
+      return res.status(202).json({result: 'failed', info: "토큰정보가 올바르지 않습니다!", data: []})
+   }
+});
+
+app.get('/alartactive', function(req, res){
+   if (!req.headers.token === token) {
+      return res.status(202).json({result: 'failed', info: "토큰 정보가 없습니다!", data: []})
+   }
+   if (req.headers.token === token) {
+      Admin.find({"status": true}).sort({'published_date': -1}).exec(function(err, admindata){
+         if (!admindata) return res.status(202).json({result: 'failed', info: "정보를 찾을수 없습니다!", data: []})
+         if (admindata.length === 0) return res.status(202).json({result: 'success', info: "알림이 없습니다!", data: []})
+         return res.status(202).json({result: 'success', info: "알림목록을 불러왔습니다!", data: admindata})
+      })
+   } else {
+      return res.status(202).json({result: 'failed', info: "토큰정보가 올바르지 않습니다!", data: []})
+   }
+});
+
 
 module.exports = app;
