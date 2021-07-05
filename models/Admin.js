@@ -6,6 +6,7 @@ var adminSchema = new Schema({
     msg: String,
     author: String,
     title: String,
+    last_update: String,
     status: Boolean,
     published_date: { type: Date, default: Date.now }
 }, {collection: 'adminAlart'});

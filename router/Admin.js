@@ -58,6 +58,7 @@ app.post('/alart', function(req, res){
       adminAlart.author = req.body.author;
       adminAlart.title = req.body.title;
       adminAlart.status = true;
+      adminAlart.last_update = today;
       adminAlart.save(function(err){
          if(err){
             console.error(err);
@@ -86,7 +87,7 @@ app.post('/alartstatus', function(req, res){
       if (req.body.status === "false") var status = true
    }
    if (req.headers.token === token) {
-      Admin.findOneAndUpdate({ _id: req.body.id }, { $set: { status: status }}, function(err, data){
+      Admin.findOneAndUpdate({ _id: req.body.id }, { $set: { status: status, last_update: today }}, function(err, data){
          if(err){
             console.error(err);
             res.json({result: 'error', info: err});
