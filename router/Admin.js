@@ -93,9 +93,9 @@ app.post('/alartstatus', function(req, res){
             res.json({result: 'error', info: err});
          }
          if (status === false) {
-            return res.status(202).json({result: 'success', info: `${data.title} (${data._id}) 알림을 비활성화했습니다!`})
+            return res.status(202).json({result: 'success', code: 0,info: `${data.title} (${data._id}) 알림을 비활성화했습니다!`})
          } else {
-            return res.status(202).json({result: 'success', info: `${data.title} (${data._id}) 알림을 활성화했습니다!`})
+            return res.status(202).json({result: 'success', code: 1, info: `${data.title} (${data._id}) 알림을 활성화했습니다!`})
          }
       });
    } else {
